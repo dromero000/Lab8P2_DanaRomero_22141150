@@ -97,7 +97,15 @@ public class Main extends javax.swing.JFrame {
             new String [] {
                 "Identificador", "Corredor", "Distancia"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jt_tabla.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jt_tablaMouseClicked(evt);
@@ -150,6 +158,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         btn_reiniciar.setText("Reiniciar");
+        btn_reiniciar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_reiniciarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -330,7 +343,12 @@ public class Main extends javax.swing.JFrame {
 
     private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
         if(actionTabla){
-            seeProgressBar();
+            try {
+                getSelectedCar();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
         }
     }//GEN-LAST:event_btn_comenzarActionPerformed
@@ -338,6 +356,11 @@ public class Main extends javax.swing.JFrame {
     private void jt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jt_tablaMouseClicked
         actionTabla = true;
     }//GEN-LAST:event_jt_tablaMouseClicked
+
+    private void btn_reiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_reiniciarActionPerformed
+        DefaultTableModel dtm = (DefaultTableModel) jt_tabla.getModel();
+        dtm.setRowCount(0);
+    }//GEN-LAST:event_btn_reiniciarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -445,9 +468,7 @@ public class Main extends javax.swing.JFrame {
         }else{
             JOptionPane.showMessageDialog(null, "El carro ya está en la carrera");
         }
-        
-        
-        
+
     }    
     
     public boolean carroEnTabla(String id){
@@ -469,13 +490,32 @@ public class Main extends javax.swing.JFrame {
     public void setDistanca(String id) throws IOException{
         idUnico(Integer.parseInt(id));
         Random r = new Random();
+        carros.skipBytes(8);
+        carros.readUTF();
+        carros.skipBytes(4);
+        int min = carros.readInt();
+        int max = carros.readInt();
+        int distanciaNueva = r.nextInt(max-min) + max;
         
+        int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
+        int distanciaVieja = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
+        int distanciaTotal = distanciaNueva+distanciaVieja;
+        jt_tabla.setValueAt(distanciaTotal, row, 2);
         
     }
     
-    public void seeProgressBar(){
+    public void getSelectedCar() throws IOException{
         int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
         int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
+        idUnico(id);
+        carros.skipBytes(8);
+        carros.readUTF();
+        int rgb = carros.readInt();
+        pb_barra.setVisible(true);
+        pb_barra.setValue(25);
+        pb_barra.repaint();
+        pb_barra.setBackground(new Color(rgb));
+        
     }
     
     
