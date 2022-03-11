@@ -6,8 +6,13 @@
 package lab8p2_danaromero_22141150;
 
 import java.awt.Color;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JColorChooser;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,6 +23,11 @@ public class Main extends javax.swing.JFrame {
     Color color;
     RandomAccessFile carros;
     public Main() {
+        try {
+            carros = new RandomAccessFile("carros.dr","rw");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
         initComponents();
         this.setVisible(true);
         this.setLocationRelativeTo(null);
@@ -220,13 +230,33 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_guardarCarroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_guardarCarroActionPerformed
-        String numId = tf_numId.getText();
-        long distancia=0;
-        String nombreCorredor = tf_nombre.getText();
-        String tipo = String.valueOf(cb_tipo.getSelectedItem());
-        int RGB = color.getRGB();
-        int minV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
-        int maxV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+        try {
+            int numId = Integer. parseInt(tf_numId.getText());
+            long distancia=0;
+            String nombreCorredor = tf_nombre.getText();
+            String tipo = String.valueOf(cb_tipo.getSelectedItem());
+            int RGB = color.getRGB();
+            int minV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+            int maxV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+            
+            //Escribir el dato en el archivo binario
+            if(idUnico(numId)){
+                carros.writeInt(numId);
+                carros.writeLong(distancia);
+                carros.writeUTF(nombreCorredor);
+                carros.writeInt(RGB);
+                carros.writeInt(minV);
+                carros.writeInt(maxV);
+                carros.writeUTF(tipo);
+                JOptionPane.showMessageDialog(null, "¡El carro fue creado exitosamente!");
+            }else{
+                JOptionPane.showMessageDialog(null, "¡El ID ingresado ya existe!");
+            }
+                
+                
+            } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btn_guardarCarroActionPerformed
 
     private void btn_colorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_colorActionPerformed
@@ -296,4 +326,23 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JTextField tf_numId;
     private javax.swing.JTextField tf_pistaLargo;
     // End of variables declaration//GEN-END:variables
+
+    //Función para ver si el ID del carro es único
+    
+    public boolean idUnico(int id) throws IOException{
+        carros.seek(0);
+        while(carros.getFilePointer()<carros.length()){
+            if(carros.readInt()==id){
+                return false;
+            }else{
+                carros.skipBytes(8);
+                carros.readUTF();
+                carros.skipBytes(12);
+                carros.readUTF();
+                
+            }
+        }
+        return true;
+        
+    }
 }
