@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
@@ -25,7 +26,7 @@ public class Main extends javax.swing.JFrame {
 
     Color color;
     RandomAccessFile carros;
-    boolean actionTabla;
+    boolean actionTabla, actionComenzar;
     public Main() {
         actionTabla = false;
         try {
@@ -336,12 +337,19 @@ public class Main extends javax.swing.JFrame {
     private void btn_agregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_agregarActionPerformed
         try {
             agregarCarroATabla();
+            
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btn_agregarActionPerformed
 
     private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
+        for(int i=0;i<jt_tabla.getRowCount();i++){
+            hilo hilo = new hilo();
+            hilo.start();
+        }
+        
+        actionComenzar=true;
         if(actionTabla){
             try {
                 getSelectedCar();
@@ -355,6 +363,14 @@ public class Main extends javax.swing.JFrame {
     
     private void jt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jt_tablaMouseClicked
         actionTabla = true;
+        if(actionComenzar){
+            try {
+                getSelectedCar();
+                
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }//GEN-LAST:event_jt_tablaMouseClicked
 
     private void btn_reiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_reiniciarActionPerformed
@@ -487,7 +503,7 @@ public class Main extends javax.swing.JFrame {
         
     }
     
-    public void setDistanca(String id) throws IOException{
+    public void setDistance(String id) throws IOException{
         idUnico(Integer.parseInt(id));
         Random r = new Random();
         carros.skipBytes(8);
@@ -508,14 +524,34 @@ public class Main extends javax.swing.JFrame {
         int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
         int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
         idUnico(id);
+        System.out.println(id);
         carros.skipBytes(8);
         carros.readUTF();
         int rgb = carros.readInt();
-        pb_barra.setVisible(true);
-        pb_barra.setValue(25);
-        pb_barra.repaint();
         pb_barra.setBackground(new Color(rgb));
         
+    }
+    
+    class hilo extends Thread{
+        
+        public void run(){
+            
+           // while()
+                
+                //pb_barra.setValue(i);
+                pb_barra.repaint();
+                
+               // if(i==){
+                    
+                }
+                try{
+                    Thread.sleep(1000);
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                    
+                }
+            }
+        }
     }
     
     
