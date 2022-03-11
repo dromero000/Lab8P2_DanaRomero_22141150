@@ -258,6 +258,7 @@ public class Main extends javax.swing.JFrame {
             int RGB = color.getRGB();
             int minV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
             int maxV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+            boolean corriendo = false;
             
             //Escribir el dato en el archivo binario
             if(idUnico(numId)){
@@ -268,6 +269,7 @@ public class Main extends javax.swing.JFrame {
                 carros.writeInt(minV);
                 carros.writeInt(maxV);
                 carros.writeUTF(tipo);
+                //carros.writeBoolean(corriendo);
                 JOptionPane.showMessageDialog(null, "¡El carro fue creado exitosamente!");
                 llenarComboBox();
             }else{
@@ -413,8 +415,24 @@ public class Main extends javax.swing.JFrame {
         idUnico(numId);
         long distancia = carros.readLong();
         String corredor = carros.readUTF();
-        Object[] u = {numId, corredor, distancia};
-        modelo.addRow(u);
+        if(!carroEnTabla(String.valueOf(cb_carros.getSelectedItem()))){
+            Object[] u = {numId, corredor, distancia};
+            modelo.addRow(u);
+        }else{
+            JOptionPane.showMessageDialog(null, "El carro ya está en la carrera");
+        }
+        
+        
         
     }    
+    
+    public boolean carroEnTabla(String id){
+        int cantRows = jt_tabla.getRowCount();
+        for(int i = 0;i<cantRows;i++){
+             if(jt_tabla.getValueAt(i, 0)==id){
+                 return true;
+             }
+        }
+        return false;
+    }
 }
