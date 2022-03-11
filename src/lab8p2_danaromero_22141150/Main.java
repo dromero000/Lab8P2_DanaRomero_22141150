@@ -9,10 +9,12 @@ import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -25,12 +27,15 @@ public class Main extends javax.swing.JFrame {
     public Main() {
         try {
             carros = new RandomAccessFile("carros.dr","rw");
-        } catch (FileNotFoundException ex) {
+            initComponents();
+            this.setVisible(true);
+            this.setLocationRelativeTo(null);
+             llenarComboBox();
+        } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        initComponents();
-        this.setVisible(true);
-        this.setLocationRelativeTo(null);
+        
+       
     }
 
     /**
@@ -75,7 +80,7 @@ public class Main extends javax.swing.JFrame {
 
         jLabel1.setText("Pista:");
 
-        jLabel2.setText("Largo");
+        jLabel2.setText("Largo:");
 
         jt_tabla.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -88,6 +93,11 @@ public class Main extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jt_tabla);
 
         btn_agregar.setText("Agregar");
+        btn_agregar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_agregarActionPerformed(evt);
+            }
+        });
 
         cb_tipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "McQueen", "Convertible", "Nascar" }));
 
@@ -111,9 +121,20 @@ public class Main extends javax.swing.JFrame {
 
         jLabel5.setText("Nombre Pista");
 
+        tf_pistaLargo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                tf_pistaLargoKeyTyped(evt);
+            }
+        });
+
         jLabel6.setText("Largo");
 
         btn_usarPista.setText("Usar Pista");
+        btn_usarPista.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_usarPistaActionPerformed(evt);
+            }
+        });
 
         btn_reiniciar.setText("Reiniciar");
 
@@ -170,28 +191,27 @@ public class Main extends javax.swing.JFrame {
                                 .addComponent(btn_pausar, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(39, 39, 39)
                                 .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jl_pista, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(33, 33, 33)
+                                .addGap(45, 45, 45)
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jl_largo, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)))))
-                .addContainerGap(29, Short.MAX_VALUE))
+                                .addGap(24, 24, 24)))))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jl_largo, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jl_pista, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btn_comenzar)
-                            .addComponent(btn_pausar))))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jl_largo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jl_pista, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btn_comenzar)
+                        .addComponent(btn_pausar))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(31, 31, 31)
                 .addComponent(pb_barra, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -249,6 +269,7 @@ public class Main extends javax.swing.JFrame {
                 carros.writeInt(maxV);
                 carros.writeUTF(tipo);
                 JOptionPane.showMessageDialog(null, "¡El carro fue creado exitosamente!");
+                llenarComboBox();
             }else{
                 JOptionPane.showMessageDialog(null, "¡El ID ingresado ya existe!");
             }
@@ -264,6 +285,33 @@ public class Main extends javax.swing.JFrame {
         color = JColorChooser.showDialog(this, "Escoja un color", Color.black);
         btn_color.setBackground(color);
     }//GEN-LAST:event_btn_colorActionPerformed
+
+    private void btn_usarPistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_usarPistaActionPerformed
+        String nombrePista = tf_nombrePista.getText();
+        long largo = Long.parseLong(tf_pistaLargo.getText());
+        if(largo>0){
+            jl_pista.setText(nombrePista);
+            jl_largo.setText(tf_pistaLargo.getText());
+        }else{
+            JOptionPane.showMessageDialog(null, "El largo debe ser mayor que 0");
+        }
+    }//GEN-LAST:event_btn_usarPistaActionPerformed
+
+    private void tf_pistaLargoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tf_pistaLargoKeyTyped
+        //tf_codigo solo aceptará dígitos
+        char c = evt.getKeyChar();
+        if (!Character.isDigit(c)){
+            evt.consume();
+        }
+    }//GEN-LAST:event_tf_pistaLargoKeyTyped
+
+    private void btn_agregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_agregarActionPerformed
+        try {
+            agregarCarroATabla();
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btn_agregarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -345,4 +393,28 @@ public class Main extends javax.swing.JFrame {
         return true;
         
     }
+    
+    public void llenarComboBox() throws IOException{
+        cb_carros.removeAllItems();
+        carros.seek(0);
+        while(carros.getFilePointer()<carros.length()){
+            cb_carros.addItem(String.valueOf(carros.readInt()));
+            //skip bytes
+            carros.readLong();
+            carros.readUTF();
+            carros.skipBytes(12);
+            carros.readUTF();
+        }
+    }
+    
+    private void agregarCarroATabla() throws IOException{
+        DefaultTableModel modelo = (DefaultTableModel)jt_tabla.getModel();
+        int numId = Integer.parseInt(String.valueOf(cb_carros.getSelectedItem()));
+        idUnico(numId);
+        long distancia = carros.readLong();
+        String corredor = carros.readUTF();
+        Object[] u = {numId, corredor, distancia};
+        modelo.addRow(u);
+        
+    }    
 }
