@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Calendar;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
@@ -24,7 +25,9 @@ public class Main extends javax.swing.JFrame {
 
     Color color;
     RandomAccessFile carros;
+    boolean actionTabla;
     public Main() {
+        actionTabla = false;
         try {
             carros = new RandomAccessFile("carros.dr","rw");
             initComponents();
@@ -75,6 +78,11 @@ public class Main extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btn_comenzar.setText("Comenzar");
+        btn_comenzar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_comenzarActionPerformed(evt);
+            }
+        });
 
         btn_pausar.setText("Pausar");
 
@@ -90,6 +98,11 @@ public class Main extends javax.swing.JFrame {
                 "Identificador", "Corredor", "Distancia"
             }
         ));
+        jt_tabla.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jt_tablaMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jt_tabla);
 
         btn_agregar.setText("Agregar");
@@ -315,6 +328,17 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btn_agregarActionPerformed
 
+    private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
+        if(actionTabla){
+            seeProgressBar();
+            
+        }
+    }//GEN-LAST:event_btn_comenzarActionPerformed
+    
+    private void jt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jt_tablaMouseClicked
+        actionTabla = true;
+    }//GEN-LAST:event_jt_tablaMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -428,11 +452,33 @@ public class Main extends javax.swing.JFrame {
     
     public boolean carroEnTabla(String id){
         int cantRows = jt_tabla.getRowCount();
+        System.out.println(cantRows);
         for(int i = 0;i<cantRows;i++){
+            System.out.println(jt_tabla.getValueAt(i,0));
              if(jt_tabla.getValueAt(i, 0)==id){
+                 
+                 
                  return true;
              }
         }
+        
         return false;
+        
     }
+    
+    public void setDistanca(String id) throws IOException{
+        idUnico(Integer.parseInt(id));
+        Random r = new Random();
+        
+        
+    }
+    
+    public void seeProgressBar(){
+        int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
+        int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
+    }
+    
+    
+    
+    
 }
