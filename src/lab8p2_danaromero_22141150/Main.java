@@ -284,7 +284,7 @@ public class Main extends javax.swing.JFrame {
             String tipo = String.valueOf(cb_tipo.getSelectedItem());
             int RGB = color.getRGB();
             int minV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
-            int maxV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+            int maxV = (tipo.equals("McQueen")?190:((tipo.equals("Convertible"))?200:180));
             boolean corriendo = false;
             
             //Escribir el dato en el archivo binario
@@ -317,10 +317,11 @@ public class Main extends javax.swing.JFrame {
 
     private void btn_usarPistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_usarPistaActionPerformed
         String nombrePista = tf_nombrePista.getText();
-        long largo = Long.parseLong(tf_pistaLargo.getText());
+        int largo = Integer.parseInt(tf_pistaLargo.getText());
         if(largo>0){
             jl_pista.setText(nombrePista);
             jl_largo.setText(tf_pistaLargo.getText());
+            pb_barra.setMaximum(largo);
         }else{
             JOptionPane.showMessageDialog(null, "El largo debe ser mayor que 0");
         }
@@ -344,11 +345,8 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_agregarActionPerformed
 
     private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
-        for(int i=0;i<jt_tabla.getRowCount();i++){
             hilo hilo = new hilo();
             hilo.start();
-        }
-        
         actionComenzar=true;
         if(actionTabla){
             try {
@@ -511,9 +509,9 @@ public class Main extends javax.swing.JFrame {
         carros.skipBytes(4);
         int min = carros.readInt();
         int max = carros.readInt();
-        int distanciaNueva = r.nextInt(max-min) + max;
-        
-        int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
+        int distanciaNueva = r.nextInt(max-min) + min;
+        int row = getRowOfCar(id);
+        System.out.println("Row: "+row);
         int distanciaVieja = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
         int distanciaTotal = distanciaNueva+distanciaVieja;
         jt_tabla.setValueAt(distanciaTotal, row, 2);
@@ -521,35 +519,56 @@ public class Main extends javax.swing.JFrame {
     }
     
     public void getSelectedCar() throws IOException{
-        int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
-        int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
-        idUnico(id);
-        System.out.println(id);
-        carros.skipBytes(8);
-        carros.readUTF();
-        int rgb = carros.readInt();
-        pb_barra.setBackground(new Color(rgb));
         
+        int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
+        if(row !=-1){
+            int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
+            int distancia = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
+            idUnico(id);
+            System.out.println(id);
+            carros.skipBytes(8);
+            carros.readUTF();
+            int rgb = carros.readInt();
+            pb_barra.setVisible(true);
+            pb_barra.setValue(distancia);
+            pb_barra.repaint();
+            pb_barra.setBackground(new Color(rgb));
+        }
+        
+        
+    }
+    
+    public int getRowOfCar(String id){
+        for(int i=0; i<jt_tabla.getRowCount();i++){
+            if(String.valueOf(jt_tabla.getValueAt(i,0)).equals(id)){
+                return i;
+            }
+        }
+        return -1;
     }
     
     class hilo extends Thread{
         
         public void run(){
-            
-           // while()
-                
-                //pb_barra.setValue(i);
-                pb_barra.repaint();
-                
-               // if(i==){
-                    
-                }
+            while(true){
+            for(int i=0; i<jt_tabla.getRowCount();i++){
                 try{
-                    Thread.sleep(1000);
-                }catch(InterruptedException e){
-                    e.printStackTrace();
+                    String id = String.valueOf(jt_tabla.getValueAt(i,0));
+                    setDistance(id); 
+                    getSelectedCar();
+                    
+                   
+                    try{
+                        Thread.sleep(1000);
+                    }catch(InterruptedException e){
+                        e.printStackTrace();
+                        
+                    }
+                }catch(IOException ex){
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     
                 }
+            }
             }
         }
     }
