@@ -5,17 +5,22 @@
  */
 package lab8p2_danaromero_22141150;
 
+import java.awt.Color;
+import java.io.RandomAccessFile;
+import javax.swing.JColorChooser;
+
 /**
  *
  * @author Dana Romero
  */
 public class Main extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Main
-     */
+    Color color;
+    RandomAccessFile carros;
     public Main() {
         initComponents();
+        this.setVisible(true);
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -81,8 +86,18 @@ public class Main extends javax.swing.JFrame {
         jLabel4.setText("Nombre Corredor");
 
         btn_color.setText("Color");
+        btn_color.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_colorActionPerformed(evt);
+            }
+        });
 
         btn_guardarCarro.setText("Guardar");
+        btn_guardarCarro.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_guardarCarroActionPerformed(evt);
+            }
+        });
 
         jLabel5.setText("Nombre Pista");
 
@@ -203,6 +218,22 @@ public class Main extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btn_guardarCarroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_guardarCarroActionPerformed
+        String numId = tf_numId.getText();
+        long distancia=0;
+        String nombreCorredor = tf_nombre.getText();
+        String tipo = String.valueOf(cb_tipo.getSelectedItem());
+        int RGB = color.getRGB();
+        int minV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+        int maxV = (tipo.equals("McQueen")?30:((tipo.equals("Convertible"))?20:40));
+    }//GEN-LAST:event_btn_guardarCarroActionPerformed
+
+    private void btn_colorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_colorActionPerformed
+        JColorChooser colorChooser = new JColorChooser();
+        color = JColorChooser.showDialog(this, "Escoja un color", Color.black);
+        btn_color.setBackground(color);
+    }//GEN-LAST:event_btn_colorActionPerformed
 
     /**
      * @param args the command line arguments
