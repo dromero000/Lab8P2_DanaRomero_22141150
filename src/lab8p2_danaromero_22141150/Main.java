@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -568,11 +569,15 @@ public class Main extends javax.swing.JFrame {
             carros.skipBytes(8);
             carros.readUTF();
             int rgb = carros.readInt();
+            
             pb_barra.setStringPainted(true);
+            pb_barra.setBackground(new Color(rgb));
             pb_barra.setForeground(new Color(rgb));
+            UIManager.put("pb_barra.background", new Color(rgb));
             pb_barra.setVisible(true);
             pb_barra.setValue(distancia);
             pb_barra.repaint();
+            
             
         }
 
@@ -590,6 +595,13 @@ public class Main extends javax.swing.JFrame {
         return -1;
     }
     
+    //No funcionó ordenar tabla
+    public void ordenarTabla(){
+        for(int i=0; i<jt_tabla.getRowCount();i++){
+            int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(i,0)));
+
+        }
+    }
     
     
     class hilo extends Thread{
