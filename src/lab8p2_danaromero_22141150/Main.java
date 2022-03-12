@@ -26,13 +26,16 @@ public class Main extends javax.swing.JFrame {
 
     Color color;
     RandomAccessFile carros;
-    boolean actionTabla, actionComenzar,ganador;
+    boolean actionTabla, actionComenzar,ganador, pistaLista, pausar;
     String ganadorNombre;
 
             
     public Main() {
+        actionComenzar = false;
         actionTabla = false;
         ganador = false;
+        pistaLista = false;
+        pausar=false;
         try {
             carros = new RandomAccessFile("carros.dr","rw");
             initComponents();
@@ -90,6 +93,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         btn_pausar.setText("Pausar");
+        btn_pausar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_pausarActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Pista:");
 
@@ -320,14 +328,19 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_colorActionPerformed
 
     private void btn_usarPistaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_usarPistaActionPerformed
+        try{
         String nombrePista = tf_nombrePista.getText();
         int largo = Integer.parseInt(tf_pistaLargo.getText());
         if(largo>0){
             jl_pista.setText(nombrePista);
             jl_largo.setText(tf_pistaLargo.getText());
             pb_barra.setMaximum(largo);
+            pistaLista=true;
         }else{
             JOptionPane.showMessageDialog(null, "El largo debe ser mayor que 0");
+        }
+        }catch(Exception e){
+            
         }
     }//GEN-LAST:event_btn_usarPistaActionPerformed
 
@@ -349,9 +362,19 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_agregarActionPerformed
 
     private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
+        if(jt_tabla.getRowCount()!=0){
+        if(pistaLista){    
             hilo hilo = new hilo();
             hilo.start();
             actionComenzar=true;
+        }else{
+            JOptionPane.showMessageDialog(null,"¡La pista no está lista!");
+        }
+        }else{
+            JOptionPane.showMessageDialog(null,"¡No hay carros en la pista!");
+        }
+        
+        
         
         
     }//GEN-LAST:event_btn_comenzarActionPerformed
@@ -360,7 +383,12 @@ public class Main extends javax.swing.JFrame {
 
         if(actionComenzar){
             try {
+                if(!ganador){
                 seeBarOfSelectedCar();
+                }else{
+                    pb_barra.setValue(0);
+                    pb_barra.repaint();
+                }
                 
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -372,8 +400,21 @@ public class Main extends javax.swing.JFrame {
         DefaultTableModel dtm = (DefaultTableModel) jt_tabla.getModel();
         dtm.setRowCount(0);
         pb_barra.setValue(0);
-        
+        actionTabla = false;
+        ganador = false;
+        ganadorNombre="";
+        actionComenzar=false;
     }//GEN-LAST:event_btn_reiniciarActionPerformed
+
+    private void btn_pausarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_pausarActionPerformed
+        if(btn_pausar.getText().equals("Pausar")){
+            pausar=true;
+            btn_pausar.setText("Reanudar");
+        }else{
+            pausar=false;
+            btn_pausar.setText("Pausar");
+        }
+    }//GEN-LAST:event_btn_pausarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -488,9 +529,7 @@ public class Main extends javax.swing.JFrame {
         int cantRows = jt_tabla.getRowCount();
         for(int i = 0;i<cantRows;i++){
             System.out.println(jt_tabla.getValueAt(i,0));
-             if(jt_tabla.getValueAt(i, 0)==id){
-                 
-                 
+             if(String.valueOf(jt_tabla.getValueAt(i, 0)).equals(id)){
                  return true;
              }
         }
@@ -536,9 +575,11 @@ public class Main extends javax.swing.JFrame {
             pb_barra.repaint();
             
         }
-        
-        
+
     }
+    
+    
+   
     
     public int getRowOfCar(String id){
         for(int i=0; i<jt_tabla.getRowCount();i++){
@@ -556,22 +597,38 @@ public class Main extends javax.swing.JFrame {
         public void run(){
             try{
             while(!ganador){
-            for(int i=0; i<jt_tabla.getRowCount();i++){
-                
-                    String id = String.valueOf(jt_tabla.getValueAt(i,0));
-                    setDistance(id); 
-                    seeBarOfSelectedCar();
-            }
-                   
-                    try{
-                        Thread.sleep(1000);
-                    }catch(InterruptedException e){
-                        e.printStackTrace();
-                        
+                if(!pausar){
+                    for(int i=0; i<jt_tabla.getRowCount();i++){
+
+                            String id = String.valueOf(jt_tabla.getValueAt(i,0));
+                            setDistance(id); 
+                            seeBarOfSelectedCar();
                     }
-            
+
+                            try{
+                                Thread.sleep(1000);
+                            }catch(InterruptedException e){
+                                e.printStackTrace();
+
+                            }
+
+                }else{
+                   
+                    while (pausar) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                }
+            }
             }
             JOptionPane.showMessageDialog(null, ganadorNombre+" ganó");
+            for(int i=0; i<jt_tabla.getRowCount();i++){
+                
+                   pb_barra.setValue(0);
+                   pb_barra.repaint();
+            }
             
                 }catch(IOException ex){
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
