@@ -348,22 +348,15 @@ public class Main extends javax.swing.JFrame {
             hilo hilo = new hilo();
             hilo.start();
         actionComenzar=true;
-        if(actionTabla){
-            try {
-                getSelectedCar();
-                
-            } catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
+        
+        
     }//GEN-LAST:event_btn_comenzarActionPerformed
     
     private void jt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jt_tablaMouseClicked
         actionTabla = true;
         if(actionComenzar){
             try {
-                getSelectedCar();
+                seeBarOfSelectedCar();
                 
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -487,7 +480,6 @@ public class Main extends javax.swing.JFrame {
     
     public boolean carroEnTabla(String id){
         int cantRows = jt_tabla.getRowCount();
-        System.out.println(cantRows);
         for(int i = 0;i<cantRows;i++){
             System.out.println(jt_tabla.getValueAt(i,0));
              if(jt_tabla.getValueAt(i, 0)==id){
@@ -511,28 +503,27 @@ public class Main extends javax.swing.JFrame {
         int max = carros.readInt();
         int distanciaNueva = r.nextInt(max-min) + min;
         int row = getRowOfCar(id);
-        System.out.println("Row: "+row);
         int distanciaVieja = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
         int distanciaTotal = distanciaNueva+distanciaVieja;
         jt_tabla.setValueAt(distanciaTotal, row, 2);
         
     }
     
-    public void getSelectedCar() throws IOException{
+    public void seeBarOfSelectedCar() throws IOException{
         
         int row = Integer.parseInt(String.valueOf(jt_tabla.getSelectedRow()));
         if(row !=-1){
             int id = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,0)));
             int distancia = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
             idUnico(id);
-            System.out.println(id);
             carros.skipBytes(8);
             carros.readUTF();
             int rgb = carros.readInt();
+            pb_barra.setBackground(new Color(rgb));
             pb_barra.setVisible(true);
             pb_barra.setValue(distancia);
             pb_barra.repaint();
-            pb_barra.setBackground(new Color(rgb));
+            
         }
         
         
@@ -555,8 +546,7 @@ public class Main extends javax.swing.JFrame {
                 try{
                     String id = String.valueOf(jt_tabla.getValueAt(i,0));
                     setDistance(id); 
-                    getSelectedCar();
-                    
+                    seeBarOfSelectedCar();
                    
                     try{
                         Thread.sleep(1000);
