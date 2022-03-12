@@ -26,9 +26,13 @@ public class Main extends javax.swing.JFrame {
 
     Color color;
     RandomAccessFile carros;
-    boolean actionTabla, actionComenzar;
+    boolean actionTabla, actionComenzar,ganador;
+    String ganadorNombre;
+
+            
     public Main() {
         actionTabla = false;
+        ganador = false;
         try {
             carros = new RandomAccessFile("carros.dr","rw");
             initComponents();
@@ -347,13 +351,13 @@ public class Main extends javax.swing.JFrame {
     private void btn_comenzarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_comenzarActionPerformed
             hilo hilo = new hilo();
             hilo.start();
-        actionComenzar=true;
+            actionComenzar=true;
         
         
     }//GEN-LAST:event_btn_comenzarActionPerformed
     
     private void jt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jt_tablaMouseClicked
-        actionTabla = true;
+
         if(actionComenzar){
             try {
                 seeBarOfSelectedCar();
@@ -367,6 +371,8 @@ public class Main extends javax.swing.JFrame {
     private void btn_reiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_reiniciarActionPerformed
         DefaultTableModel dtm = (DefaultTableModel) jt_tabla.getModel();
         dtm.setRowCount(0);
+        pb_barra.setValue(0);
+        
     }//GEN-LAST:event_btn_reiniciarActionPerformed
 
     /**
@@ -497,7 +503,7 @@ public class Main extends javax.swing.JFrame {
         idUnico(Integer.parseInt(id));
         Random r = new Random();
         carros.skipBytes(8);
-        carros.readUTF();
+        String nombre = carros.readUTF();
         carros.skipBytes(4);
         int min = carros.readInt();
         int max = carros.readInt();
@@ -505,6 +511,10 @@ public class Main extends javax.swing.JFrame {
         int row = getRowOfCar(id);
         int distanciaVieja = Integer.parseInt(String.valueOf(jt_tabla.getValueAt(row,2)));
         int distanciaTotal = distanciaNueva+distanciaVieja;
+        if(distanciaTotal>=Integer.parseInt(jl_largo.getText())){
+            ganador = true;
+            ganadorNombre = nombre;
+        }
         jt_tabla.setValueAt(distanciaTotal, row, 2);
         
     }
@@ -519,7 +529,8 @@ public class Main extends javax.swing.JFrame {
             carros.skipBytes(8);
             carros.readUTF();
             int rgb = carros.readInt();
-            pb_barra.setBackground(new Color(rgb));
+            pb_barra.setStringPainted(true);
+            pb_barra.setForeground(new Color(rgb));
             pb_barra.setVisible(true);
             pb_barra.setValue(distancia);
             pb_barra.repaint();
@@ -538,15 +549,19 @@ public class Main extends javax.swing.JFrame {
         return -1;
     }
     
+    
+    
     class hilo extends Thread{
         
         public void run(){
-            while(true){
+            try{
+            while(!ganador){
             for(int i=0; i<jt_tabla.getRowCount();i++){
-                try{
+                
                     String id = String.valueOf(jt_tabla.getValueAt(i,0));
                     setDistance(id); 
                     seeBarOfSelectedCar();
+            }
                    
                     try{
                         Thread.sleep(1000);
@@ -554,14 +569,18 @@ public class Main extends javax.swing.JFrame {
                         e.printStackTrace();
                         
                     }
+            
+            }
+            JOptionPane.showMessageDialog(null, ganadorNombre+" ganó");
+            
                 }catch(IOException ex){
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     
                 }
-            }
+            
             }
         }
-    }
+    
     
     
     
